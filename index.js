@@ -8,57 +8,103 @@ const getData = async () => {
 (async () => {
   await getData();
   let comments = dataGlobal.comments;
+  localStorage.setItem("data1", `${JSON.stringify(comments)}`)
   let subComments = dataGlobal.comments[1].replies;
-
-  populate(comments, ".maincontent");
-  populate(subComments, ".psuedo ");
+  let data1 = JSON.parse(localStorage.getItem("data1"));
+  console.log(data1);
+  localStorage.setItem("data2", `${JSON.stringify(subComments)}`)
+  let data2 = JSON.parse(localStorage.getItem("data2"))
+  console.log(data1);
+  populate(data1, ".maincontent");
+  populate(data2, ".psuedo ");
   document.querySelector("#inputs").innerHTML = `<img src=${dataGlobal.currentUser.image.png}></img>
     <input type="text" placeholder="Add a comment...">
     <button class="send" type="submit">SEND</button>`;
   function populate(x, y) {
-    let mapThis = x.map((cont) => {
-      return `<div class=container${cont.id}> <section >
-        <div class="buttons">
-          <button class="plusbuttons" type="button">+</button>
-          <b class=${cont.user.username}>${cont.score}</b>
-          <button class="minusbuttons" type="button">-</button>
-        </div>
-        <article>
-          <div class="outerbox">
-            <div class="innerbox">
-              <img src="${cont.user.image.png}" alt="">
-              <span>${cont.user.username}</span>
-              <small>${cont.createdAt}</small>
-            </div>
-            <div class="box reply">
-              <img src="./images/icon-reply.svg" alt="icon-reply">
-              <span>Reply</span>
-            </div>
+
+    var createContent = x.map((cont) => {
+      if (cont.user.username !== "juliusomo") {
+        return `<div class=container${cont.id}> <section >
+          <div class="buttons">
+            <button class="plusbuttons" type="button">+</button>
+            <b class=${cont.user.username}>${cont.score}</b>
+            <button class="minusbuttons" type="button">-</button>
           </div>
-          <p id="oop">${cont.content}</p>
-        </article>
-      </section> 
-      </div>`
+          <article>
+            <div class="outerbox">
+              <div class="innerbox">
+                <img src="${cont.user.image.png}" alt="">
+                <span>${cont.user.username}</span>
+                <small>${cont.createdAt}</small>
+              </div>
+              <div class="box reply">
+                <img src="./images/icon-reply.svg" alt="icon-reply">
+                <span>Reply</span>
+              </div>
+            </div>
+            <p id="oop">${cont.content}</p>
+          </article>
+        </section> 
+        </div>`
+      }
+      else {
+        return `<div class=container${cont.id}> <section >
+            <div class="buttons">
+              <button class="plusbuttons" type="button">+</button>
+              <b class=${cont.user.username}>${cont.score}</b>
+              <button class="minusbuttons" type="button">-</button>
+            </div>
+            <article>
+              <div class="outerbox reouter">
+                <div class="innerbox ">
+                  <img src="${cont.user.image.png}" alt="">
+                  <span>${cont.user.username}</span>
+                  <b class="you">you</b>
+                  <small>${cont.createdAt}</small>
+                </div>
+                <div class="box remake">
+                <span class="delete"><img src="./images/icon-delete.svg" alt="">Delete</span>
+                <span class="edit"><img src="./images/icon-edit.svg" alt="">Edit</span>
+                 </div>
+              </div>
+              <p id="oop">${cont.content}</p>
+            </article>
+          </section> 
+          </div>`
+
+      }
     })
-    document.querySelector(y).innerHTML = mapThis.join("");
+
+
+    document.querySelector(y).innerHTML = createContent.join("");
   }
   function likeDislike() {
     let plusButtons = document.querySelectorAll(".plusbuttons");
     let minuminusButtons = document.querySelectorAll(".minusbuttons");
-
+   
     plusButtons.forEach((a) => {
+      let checkStatus = true;
       a.addEventListener("click", (e) => {
-
-        let myNum = e.currentTarget.nextElementSibling.className;
-        if (myNum !== dataGlobal.currentUser.username) { document.querySelector("." + myNum).innerHTML++; }
-
+        
+        if (checkStatus == true) {
+          let myNum = e.currentTarget.nextElementSibling.className;
+          if (myNum !== dataGlobal.currentUser.username) { document.querySelector("." + myNum).innerHTML++; }
+          checkStatus=false;
+          
+        }
+       
       })
     })
     minuminusButtons.forEach((x) => {
+      let checkStatus = true;
       x.addEventListener("click", (e) => {
-        let myNum = e.currentTarget.previousElementSibling.className;
-        if (myNum !== dataGlobal.currentUser.username) { document.querySelector("." + myNum).innerHTML--; }
-    
+        if(checkStatus==true){
+          let myNum = e.currentTarget.previousElementSibling.className;
+          if (myNum !== dataGlobal.currentUser.username) { document.querySelector("." + myNum).innerHTML--; }
+          checkStatus=false;
+        }
+
+
       })
     })
   }
@@ -74,15 +120,20 @@ const getData = async () => {
     cont.addEventListener("click", (e) => {
       document.querySelector("#inputs").style.display = "flex"
       let parent = e.currentTarget.parentElement.parentElement.parentElement.parentElement;
+      let semiParent = e.currentTarget.previousElementSibling.children[1].innerHTML;
+      console.log(semiParent);
+      if (semiParent !== "juliusomo") {
+        document.querySelector("section").style.flexDirection.parentElement = "column"
+        parent.appendChild(newReply);
+      }
 
-      document.querySelector("section").style.flexDirection.parentElement = "column"
-      parent.appendChild(newReply);
     })
   })
   document.querySelector("button.send").addEventListener("click", (e) => {
-    console.log("l");
     let parent = e.currentTarget.parentElement.parentElement.previousElementSibling;
     console.log(parent);
+    let semi=e.currentTarget.parentElement.parentElement;
+    console.log(semi);
     let elem = document.createElement("article");
     let val = e.currentTarget.parentElement.children[1].value;
     elem.innerHTML = `<div><section >
@@ -96,6 +147,7 @@ const getData = async () => {
         <div class="innerbox">
           <img src="${dataGlobal.currentUser.image.png}" alt="">
           <span>${dataGlobal.currentUser.username}</span>
+          <b class="you">you</b>
           <small>0 minutes ago</small>
         </div>
         <div class="box">
@@ -113,7 +165,6 @@ const getData = async () => {
     myDel.forEach((myD) => {
       myD.addEventListener("click", (e) => {
         let currentTarget = e.currentTarget.parentElement.parentElement.parentElement.parentElement;
-        console.log(currentTarget);
         let alert = document.createElement("article");
         alert.className = "ola";
         alert.innerHTML = ` <article class="popup">
@@ -140,38 +191,32 @@ const getData = async () => {
         })
       })
     })
-          console.log(myDel);
-          let myEdt = document.querySelectorAll(".edit");
-          myEdt.forEach((myE) => {
-            myE.addEventListener("click", (e) => {
-              let currentTarget = e.currentTarget.parentElement.parentElement.parentElement.parentElement.parentElement;
-              let nx = e.currentTarget.parentElement.parentElement.nextElementSibling.className;
-              let pakka=e.currentTarget.parentElement.parentElement.nextElementSibling.className;
-              console.log(pakka);
-              let bx = e.currentTarget.parentElement.parentElement.parentElement.parentElement.nextSibling.nextElementSibling;
-              console.log(bx);
-              currentTarget.appendChild(newReply);
-              document.querySelector("form#inputs").style.display = "flex";
-              newReply.addEventListener("click", (e) => {
+    console.log(myDel);
+    let myEdt = document.querySelectorAll(".edit");
+    myEdt.forEach((myE) => {
+      myE.addEventListener("click", (e) => {
+        let currentTarget = e.currentTarget.parentElement.parentElement.parentElement.parentElement.parentElement;
+        let nx = e.currentTarget.parentElement.parentElement.nextElementSibling.className;
+        let pakka = e.currentTarget.parentElement.parentElement.nextElementSibling.className;
+        console.log(pakka);
+        let bx = e.currentTarget.parentElement.parentElement.parentElement.parentElement.nextSibling.nextElementSibling;
+        currentTarget.appendChild(newReply);
+        document.querySelector("form#inputs").style.display = "flex";
+        newReply.addEventListener("click", (e) => {
 
-                document.querySelector(`.${pakka}`).innerHTML = document.querySelector(`#${e.currentTarget.id} input`).value;
-              })
-            })
-          })
+          document.querySelector(`.${pakka}`).innerHTML = document.querySelector(`#${e.currentTarget.id} input`).value;
+        })
+      })
+    })
   })
-  
-  let btns = document.querySelectorAll(".btns");
-  function deleteAction(){
-
-  }
   newReply.addEventListener("submit", (e) => {
     e.preventDefault();
     let val = e.currentTarget[0].value;
     var replyArray = [];
     let unqid = e.currentTarget.parentElement.className;
     document.querySelector("#inputs").style.display = "none";
-    
-   
+
+
     hardData(comments);
     hardData(subComments);
     function hardData(data) {
@@ -181,13 +226,12 @@ const getData = async () => {
           replyArray.push(val)
           innerPopulate(replyArray, "." + unqid);
           let myDel = document.querySelectorAll(".delete");
-          console.log(myDel);
           let myEdt = document.querySelectorAll(".edit");
           myEdt.forEach((myE) => {
             myE.addEventListener("click", (e) => {
               let currentTarget = e.currentTarget.parentElement.parentElement.parentElement.parentElement.parentElement;
               let nx = e.currentTarget.parentElement.parentElement.nextElementSibling.className;
-              let pakka=e.currentTarget.parentElement.parentElement.nextElementSibling.className;
+              let pakka = e.currentTarget.parentElement.parentElement.nextElementSibling.className;
               console.log(pakka);
               let bx = e.currentTarget.parentElement.parentElement.parentElement.parentElement.nextSibling.nextElementSibling;
               console.log(bx);
@@ -241,6 +285,7 @@ const getData = async () => {
                           <div class="innerbox">
                             <img src="${dataGlobal.currentUser.image.png}" alt="">
                             <span>${dataGlobal.currentUser.username}</span>
+                            <b class="you">you</b>
                             <small>0 minutes ago</small>
                           </div>
                           <div class="box">
